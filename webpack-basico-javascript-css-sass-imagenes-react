@@ -1,0 +1,252 @@
+
+todo lo anterior +
+
+--------------------------------------------------------------------------------------------------------
+// REACT
+(1)
+// Instalamos react y react-dom como dependencia de PRODUCCION!!!!
+npm install react react-dom --save
+npm install @babel/preset-react --save
+
+
+(2)
+// en idex.html creamos un div para contener la aplicación de react
+<div id="root"></div>
+
+
+
+(3)
+// creamos un componente: MiComponente.js
+//ponemos código de react dentro del componente
+import React from 'react';
+
+export const MiComponente = () => {
+    return <h1>Hola mundo</h1>;
+}
+
+
+(4)
+// Cambiamos la extensión de index.js a index.jsx
+// Dentro de jsx creamos un punto de entrada de react -->
+import "./mystyles.css";
+
+import React from "react";
+import { createRoot } from "react-dom/client";
+import {MiComponente} from "./MiComponente";
+
+
+const container = document.getElementById("root");
+const root = createRoot(container);
+root.render(<MiComponente />);
+
+
+
+
+(5)
+// Modificamos en webpack.service.js el entrypoint de js a jsx
+entry: {
+	app: "./src/index.jsx",
+	appStyles: "./src/mystyles.scss"
+},
+
+
+(6)
+// Modificamos en webpack.service.js que .js ahora debe ser .jsx ó .js
+{
+	test: /\.jsx?$/,
+	exclude: /node_modules/,
+	loader: "babel-loader",
+},
+
+
+
+(7)
+//// Modificamos en webpack.service.js 
+resolve: {
+	extensions: [".js", ".jsx"]
+},
+
+
+(8)
+// Añadimos los preset de react en .babelrc
+{
+  "presets": [
+    "@babel/preset-env",
+    "@babel/preset-react"
+  ]
+}
+
+
+
+(9)
+//webpack.config.js completo
+const htmlWebPackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const path = require("path");
+
+
+module.exports = {
+    // Se establece la opción 'modo' en 'desarrollo' para habilitar los valores predeterminados para cada entorno.
+    resolve: {
+        extensions: [".js", ".jsx"]
+    },
+    mode: 'development',
+    // Cambiamos los puntos de entrada tratándolo en vez de como un array, como un objeto con su par: clave-valor
+    // Defino un punto de entrada para la aplicación --> app
+    // Defino un punto de entrada para el css --> appStyles
+    entry: {
+        app: "./src/index.jsx",
+        appStyles: "./src/mystyles.scss"
+    },
+    // Definimos las Salidas que va a generar webpack.
+    // Al hacer chunkhash genera un hash relacionado con el contenido del fichero, así tendremos un nombre único
+    output: {
+        filename: "[name].[chunkhash].js",
+        clean: true,
+    },
+
+    module: {
+        rules: [
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+            },
+            {
+                test: /\.scss$/,
+                exclude: /node_modules/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    "css-loader",
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            implementation: require("sass"),
+                        },
+                    },
+                ],
+            },
+            {
+                test: /\.css$/,
+                // Usamos el plugin: mini-css-extract-plugin para tener un ficher externo de css.
+                // Previamente hay que instalarlo con npm install
+                use: [MiniCssExtractPlugin.loader, "css-loader"],
+            },
+            {
+                test: /\.(png|jpg|gif)$/,
+                type: "asset/resource",
+            },
+            {
+                test: /\.html$/,
+                loader: "html-loader",
+            }
+        ],
+    },
+    plugins: [
+        // Instanciamos el htmlWebPackPlugin
+        new htmlWebPackPlugin({
+            filename: 'index.html',
+            template: './src/index.html',
+            scriptLoading: 'blocking',
+        }),
+        new MiniCssExtractPlugin({
+            filename: '[name].[chunkhash].css',
+        })
+    ],
+    devServer: {
+        compress: true,
+        port: 9000,
+        static:{
+            directory: path.join(__dirname, 'src'),
+        }
+    },
+};
+
+
+
+
+(10)
+/const htmlWebPackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const path = require("path");
+const basePath = __dirname;
+
+module.exports = {
+    // Se establece la opción 'modo' en 'desarrollo' para habilitar los valores predeterminados para cada entorno.
+    mode: 'development',
+    context: path.join(basePath, "src"),
+    resolve: {
+        extensions: [".js", ".jsx"]
+    },
+    // Cambiamos los puntos de entrada tratándolo en vez de como un array, como un objeto con su par: clave-valor
+    // Defino un punto de entrada para la aplicación --> app
+    // Defino un punto de entrada para el css --> appStyles
+    entry: {
+        app: "./index.jsx",
+        appStyles: "./mystyles.scss"
+    },
+    // Definimos las Salidas que va a generar webpack.
+    // Al hacer chunkhash genera un hash relacionado con el contenido del fichero, así tendremos un nombre único
+    output: {
+        filename: "[name].[chunkhash].js",
+        clean: true,
+    },
+
+    module: {
+        rules: [
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+            },
+            {
+                test: /\.scss$/,
+                exclude: /node_modules/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    "css-loader",
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            implementation: require("sass"),
+                        },
+                    },
+                ],
+            },
+            {
+                test: /\.css$/,
+                // Usamos el plugin: mini-css-extract-plugin para tener un ficher externo de css.
+                // Previamente hay que instalarlo con npm install
+                use: [MiniCssExtractPlugin.loader, "css-loader"],
+            },
+            {
+                test: /\.(png|jpg|gif)$/,
+                type: "asset/resource",
+            },
+            {
+                test: /\.html$/,
+                loader: "html-loader",
+            }
+        ],
+    },
+    plugins: [
+        // Instanciamos el htmlWebPackPlugin
+        new htmlWebPackPlugin({
+            filename: 'index.html',
+            template: './index.html',
+            scriptLoading: 'blocking',
+        }),
+        new MiniCssExtractPlugin({
+            filename: '[name].[chunkhash].css',
+        })
+    ],
+    devServer: {
+        compress: true,
+        port: 9000,
+        static:{
+            directory: path.join(__dirname, 'src'),
+        }
+    },
+};
+
+
